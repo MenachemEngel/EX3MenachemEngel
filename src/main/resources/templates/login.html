@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script>
+
+        //the namespace...
+        (function () {
+
+
+        //function that get the username from the input
+        var getUsername  = function(){
+            var user = document.getElementById("defaultLoginFormEmail").value;
+            return user.trim().toLowerCase();
+        }
+
+        //function that get the password from the input
+        var getPassword  = function(){
+            var password = document.getElementById("defaultLoginFormPassword").value;
+            return password.trim();
+        }
+
+        //function that check the status of the response
+        var check = function(response) {
+            if (response.status >= 200 && response.status < 300) {
+                return Promise.resolve(response)
+            } else if(response.status === 404) {
+                document.querySelector("#err_msg").innerHTML = "User not exist.";
+                document.getElementById("err_msg").style.display = "block";
+            } else {
+                return Promise.reject(new Error(response.statusText))
+            }
+        }
+
+
+        //function that send the data if post method to server using ajax
+        var mySubmit = function () {
+            console.log("login checker!!!");
+            var user = getUsername();
+            var password = getPassword();
+            if (user === "")
+                return;
+            document.getElementById("err_msg").style.display = "none";
+
+            const postData = {"username": user ,"password": password};
+
+            fetch("/login", {method: 'POST',  headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData)})
+                .then(check)
+                .then(function (response) {
+                    response.json().then(function (data) {
+                        if (data.status !== "Ok") {
+                            document.getElementById("err_msg").style.display = "block";
+                        } else {
+                            window.location.replace("/");
+                        }
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+                });
+        }
+            //add listeners to buttons and load the list
+            window.addEventListener('DOMContentLoaded', function () {
+                document.getElementById("submit_btn").addEventListener('click', function(){mySubmit()});
+            });
+
+        })();
+    </script>
+    <style>
+        #log, #reg{
+            color: blue;
+            cursor: pointer;
+        }
+    </style>
+    <title>Login</title>
+</head>
+</head>
+<body>
+    <div class="row">
+    <div class="col-4"></div>
+    <div class="col-4">
+        <!--<form id="form2" class="text-center border border-light p-5" action="login" method="post">-->
+
+        <p class="mb-4 display-4">Login</p>
+
+        <div id="err_msg" class="alert alert-danger" role="alert" style="display: none">Wrong username or password</div>
+
+        <!-- Username -->
+        <input type="username" id="defaultLoginFormEmail" class="col-12 form-control mb-4" placeholder="Username" name="username">
+
+        <!-- Password -->
+        <input type="password" id="defaultLoginFormPassword" class="col-12 form-control mb-4" placeholder="Password" name="password">
+
+        <!-- Sign in button -->
+        <input id="submit_btn" class="btn btn-outline-info btn-block col-12 my-4" type="submit" value="Login">
+
+       <!-- </form>-->
+    </div>
+    </div>
+</body>
+</html>
